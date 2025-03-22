@@ -18,6 +18,7 @@ const tourSchema = mongoose.Schema({
   comments: [
     {
       userId: String,
+      userName: String,  // Ajout du nom de l'utilisateur
       text: String,
       createdAt: {
         type: Date,

@@ -1,5 +1,6 @@
 import TourModal from "../models/tour.js";
 import mongoose from "mongoose";
+import UserModal from "../models/user.js"; 
 
 export const createTour = async (req, res) => {
   const tour = req.body;
@@ -167,6 +168,7 @@ export const likeTour = async (req, res) => {
   }
 };
 
+
 export const commentTour = async (req, res) => {
   const { id } = req.params;
   const { comment } = req.body;
@@ -181,26 +183,32 @@ export const commentTour = async (req, res) => {
     }
 
     const tour = await TourModal.findById(id);
-
     if (!tour) {
       return res.status(404).json({ message: "Tour not found" });
     }
 
+    // Vérifier si l'utilisateur existe
+    const user = await UserModal.findById(req.userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
     const newComment = {
       userId: req.userId,
+      userName: user.name,  // Assurez-vous que user.name existe bien
       text: comment,
       createdAt: new Date(),
     };
 
     tour.comments.push(newComment);
-
-    const updatedTour = await TourModal.findByIdAndUpdate(id, tour, {
-      new: true,
-    });
+    const updatedTour = await TourModal.findByIdAndUpdate(id, tour, { new: true });
 
     res.status(200).json(updatedTour);
   } catch (error) {
-    res.status(500).json({ message: "Something went wrong" });
+    console.error("Erreur lors de l'ajout d'un commentaire :", error);  // Debug
+    res.status(500).json({ message: "Something went wrong", error });
   }
 };
+
+
 
